@@ -1,0 +1,13 @@
+version: "1.3.19"
+endpoints:
+  custom:
+    - name: "Roseram"
+      apiKey: "user_provided"
+      baseURL: "https://roseram.com/api/v1"
+      models:
+        default: ["roseram"]
+        fetch: false
+      modelDisplayLabel: "Roseram"
+      titleConvo: false
+      summarize: false
+      dropParams: ["user", "top_p", "presence_penalty", "frequency_penalty", "stop"]
