@@ -11,6 +11,7 @@
   "scripts": {
     "start": "node src/index.mjs",
     "help": "node src/index.mjs --help",
-    "check": "node --check src/index.mjs"
+    "check": "node --check src/index.mjs && node --check src/terminal.mjs && node --check src/terminal-profile.mjs && node --check src/roseram-api.mjs",
+    "terminal": "node src/terminal.mjs"
   }
 }

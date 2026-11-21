@@ -26,6 +26,16 @@ The server binds to loopback, prints a local URL, and sends model requests to Ro
 
 The live hosted route is [roseram.com/downloads/grok-bot](https://roseram.com/downloads/grok-bot). It uses Roseram sign-in, server-side plan/credit checks, and usage metering. The hosted workspace talks to the parent Roseram page using a restricted message bridge; the Node.js client instead uses a developer API key. A standalone repository clone does not independently implement Roseram account login or billing.
 
+## Terminal workflow
+
+Use Node.js 22 or later and set `ROSERAM_API_KEY` in your shell.
+
+```sh
+npm run terminal -- --mode chat
+```
+
+For available modes, run `npm run terminal -- --help`. An interactive terminal keeps the recent conversation in memory. Use `/clear` to reset it and `/quit` to exit. Model requests may use Roseram credits.
+
 ## Current limitations
 
 The current browser client provides text conversation. It does not implement X automation, voice, or media generation.
