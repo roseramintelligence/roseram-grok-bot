@@ -1,0 +1,551 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="form-action 'none'"><title>Roseram Grok Bot</title><style>:root{font-family:system-ui,sans-serif;color:#e8e8ed;background:#17181b;color-scheme:dark;--accent:#9dafff;--line:#353641;--panel:#202127}
+*{box-sizing:border-box}
+body{margin:0;min-width:0}
+button,input,textarea{font:inherit;color:inherit}
+button{background:#292b35;border:1px solid var(--line);border-radius:7px;padding:8px 12px;cursor:pointer;text-align:left}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.55;cursor:wait}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 15px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+header strong{font-size:14px;letter-spacing:.01em}
+header small{color:#c3c5cb;font-size:12px}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.shell{display:grid;grid-template-columns:155px minmax(0,1fr);min-height:390px}
+aside{padding:15px 12px;border-right:1px solid var(--line);background:var(--panel)}
+aside small{display:block;color:#babdc6;font-size:11px;margin-bottom:9px}
+aside button{width:100%;font-size:13px}
+main{min-width:0;padding:20px}
+.content{max-width:720px;margin-inline:auto}
+h1{font-size:clamp(20px,4vw,31px);line-height:1.18;margin:0 0 13px;letter-spacing:-.04em}
+p{line-height:1.5;color:#c6c7cf;font-size:13px}
+input,textarea{min-width:0;width:100%;border:1px solid var(--line);background:#18191f;border-radius:8px;padding:10px}
+textarea{resize:vertical}
+form{display:grid;gap:7px}
+form label{font-size:12px}
+#log{max-height:220px;overflow:auto}
+#log:empty{display:none}
+#log article{margin-bottom:8px;padding:11px 13px;background:var(--panel);border:1px solid var(--line);border-radius:8px;font-size:13px;overflow-wrap:anywhere;white-space:pre-wrap;animation:appear .3s ease-out}
+#log strong{display:block;margin-bottom:5px;color:var(--accent)}
+#status{margin:6px 0;min-height:1em;color:#e7c1a3}
+.submit{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+#send,#example{background:var(--accent);color:#171726;font-weight:700;border:0}
+.editorGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:13px}
+.file{min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--panel);align-self:start}
+.fileHead{padding:9px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;font-size:12px;overflow-wrap:anywhere}
+.file label{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.file input{position:absolute;width:1px;height:1px;opacity:0}
+.file label:focus-within{outline:2px solid var(--accent)}
+#source{display:block;min-height:195px;font:13px/1.55 ui-monospace,monospace;border-radius:0 0 7px 7px}
+details{margin-bottom:10px;font-size:12px;color:#c6c7cf}
+details input{margin-top:6px}
+.terminal{--accent:#f2aa85;--panel:#251f1c;--line:#543c33;font-family:ui-monospace,monospace}
+.terminal .shell{grid-template-columns:minmax(0,1fr)}
+.terminal aside{display:none}
+.terminal h1{letter-spacing:0}
+.chat{--accent:#f1f1f4;--panel:#161719;background:#0d0f11}
+.editor{--accent:#82c7ff;--panel:#20262c;--line:#3b464e}
+.agent{--accent:#d3d1c4;--panel:#242321;--line:#48453d}
+.playground{--accent:#a1ccff}
+@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){#log article{animation:none}}
+@media(max-width:650px){.shell{grid-template-columns:1fr}.shell aside{display:none}.editorGrid{grid-template-columns:1fr}main{padding:14px}#source{min-height:130px}}
+
+
+.terminalIntro { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 12px; padding: 12px 14px; margin-bottom: 16px; border: 1px solid var(--accent); border-radius: 9px; color: var(--accent); }
+.terminalIntro span { grid-row: span 2; font-size: 27px; }
+.terminalIntro small { color: #d6b9a8; }
+.terminal h1 { font-size: 17px; }
+.chat .content { max-width: 550px; padding-top: 28px; }
+.chat h1 { text-align: center; margin-bottom: 24px; }
+.chat #prompt { min-height: 85px; border-radius: 15px; background: #1a1c20; }
+.chat #send { border-radius: 999px; }
+.editor main, .agent main { padding: 10px; }
+.editor h1, .agent h1 { font-size: 17px; }
+.editor .fileHead, .agent .fileHead { background: #191a1f; }
+.editorGrid > div:last-child { min-width: 0; }
+.panelLabel { border-bottom: 1px solid var(--line); margin-bottom: 12px; padding: 4px 0 8px; color: var(--accent); font-size: 12px; font-weight: 700; }
+.tree { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; color: #c2c4cc; font: 12px/1.8 ui-monospace, monospace; }
+.tree span { display: block; margin-left: 12px; }
+.tree span:last-child { color: var(--accent); margin-left: 20px; }
+.modelBar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 7px; font-size: 12px; }
+.modelBar strong { color: var(--accent); }
+
+
+.workbench{--accent:#9cb1fc;--panel:#222326;--line:#383940;background:#1c1d20}
+.workbench .shell{min-height:420px}
+.workbench .editorGrid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);direction:rtl}
+.workbench .editorGrid>*{direction:ltr}
+.workbench .content{max-width:none}
+.workbench .editorGrid h1{font-size:22px}
+.workbench .editorGrid #log article{background:#27292f;border-color:#383a43}
+.workbench .file{border-radius:6px}
+.terminal .editorGrid{grid-template-columns:minmax(0,1fr);max-width:720px}
+.terminal .file{order:2}
+.terminal .file #source{min-height:85px}
+.terminal #prompt{border-radius:2px;border-inline:0;border-top:1px solid #5d4438;border-bottom:1px solid #5d4438;background:transparent}
+.chat .shell{grid-template-columns:175px minmax(0,1fr)}
+.chat .content{padding-top:clamp(24px,8vh,92px)}
+.chat #composer{border:1px solid #36383d;border-radius:22px;padding:12px;background:#17191c}
+.chat #composer textarea{border:0;background:transparent}
+.chat #send{min-width:66px;text-align:center}
+.chat #log article{border-color:#2b2d30;background:#161a1d}
+#status a{color:var(--accent)}
+@media(max-width:650px){.chat .shell,.workbench .editorGrid{grid-template-columns:minmax(0,1fr)}.workbench .file{order:2}}
+
+
+body.referenceBody { color-scheme: light; background: #f7f7fa; color: #202122; }
+.referenceApp {
+  --panel: #fafaf9;
+  --line: #dededc;
+  --accent: #234f91;
+  display: grid;
+  min-height: 100vh;
+  background: #fff;
+  font: 14px/1.45 system-ui, sans-serif;
+}
+.referenceApp button { background: #fff; border-color: var(--line); color: #242424; }
+.referenceApp button:disabled { color: #595b63; background: #e8e8ea; }
+.referenceApp #send, .referenceApp #example { background: var(--accent); color: white; }
+.referenceApp button:focus-visible, .referenceApp :is(input,textarea,summary):focus-visible { outline-color: var(--accent); }
+.referenceApp input, .referenceApp textarea { background: #fff; border-color: var(--line); color: #222; }
+.referenceApp :is(p,small,details) { color: #555; }
+.referenceApp [hidden] { display: none !important; }
+.referenceApp header { min-height: 53px; padding: 8px 13px; gap: 9px; background: var(--panel); }
+.referenceApp header .actions { margin-left: auto; align-items: center; }
+.referenceApp .actions button { padding: 5px 8px; font-size: 12px; }
+.referenceApp aside { padding: 12px; }
+.referenceApp main { min-width: 0; padding: 0; }
+.referenceApp #composer { margin-top: 14px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
+.referenceApp #prompt { border: 0; resize: vertical; padding: 4px; }
+.referenceApp #status { color: #5a3322; overflow-wrap: anywhere; }
+.referenceApp .referenceNotice { margin-bottom: 9px; }
+.referenceApp #log article { background: #f7f7f7; border-color: var(--line); }
+.windowDots { display: inline-flex; gap: 5px; align-items: center; }
+.windowDots i { width: 8px; height: 8px; border-radius: 50%; background: #ec665a; }
+.windowDots i+ i { background: #efb54b; }
+.windowDots i:last-child { background: #5abf58; }
+.referenceHeading h1 { font-size: clamp(18px, 3.3vw, 27px); margin: 0; }
+.referenceHeading p { font-size: 12px; margin: 5px 0 0; }
+.referenceSplit { display: grid; grid-template-columns: minmax(0,.95fr) minmax(0,1.05fr); align-items: stretch; }
+.referenceSplit main { padding: 15px; }
+.referenceSplit main > div:last-child > h1 { display: none; }
+.diffPanel { border-left: 1px solid var(--line); min-width: 0; background: #f6f6f6; }
+.diffBar { padding: 11px 12px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 7px; border-bottom: 1px solid var(--line); }
+.diffBar span { color: #555; font-size: 12px; }
+.diffFile { padding: 7px 13px; background: #eeeeee; border-bottom: 1px solid var(--line); font: 12px/1.5 ui-monospace,monospace; }
+.sampleDiff { overflow: auto; font: 12px/1.6 ui-monospace,monospace; }
+.sampleDiff div { display: flex; gap: 10px; min-width: max-content; padding: 6px 10px; }
+.sampleDiff span { min-width: 17px; color: #555; }
+.sampleDiff .added { background: #dbefe2; color: #174b2d; }
+.sampleDiff .removed { background: #f8e4e3; color: #7d2923; }
+.fileDisclosure { margin: 12px; }
+.fileDisclosure summary { cursor: pointer; }
+.referenceFile { min-width: 0; margin: 10px; }
+.referenceFile .file { width: 100%; }
+.referenceFile #source { min-height: 125px; }
+.referenceApp .sampleRequest { color: #222; margin: 12px 0; padding: 10px; border-radius: 9px; background: #eeeeee; }
+.sampleSummary { margin: 14px 0; }
+.sampleSummary p { margin-top: 4px; }
+.codexWindow { border-top: 4px solid #40b7e0; }
+.codexWindow .diffPanel { background: #fcfcfc; }
+.codexWindow .fileDisclosure { background: #fff; border: 1px solid var(--line); border-radius: 9px; padding: 9px; }
+.cursorWindow { --panel: #f1f0ed; --accent: #16547b; border-top: 4px solid #a1a699; }
+.cursorWindow .windowDots i { background: #ababaa; }
+.cursorWindow .sampleSummary { padding: 9px; border: 1px solid var(--line); border-radius: 7px; }
+.cursorWindow .diffPanel { background: #f3f3f1; }
+.reviewWindow {
+  --panel: #f8f7f2;
+  --line: #dedbd2;
+  --accent: #9d482e;
+  grid-template-columns: minmax(112px,.85fr) minmax(0,1.8fr) minmax(125px,.95fr);
+  background: #fcfbf7;
+}
+.reviewRail .referenceTabs { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 4px; padding: 5px; background: #eeeae0; border-radius: 6px; margin: 12px 0; font-size: 11px; }
+.referenceTabs strong { background: #fff; padding-inline: 3px; border-radius: 3px; }
+.reviewRail .selectedTask { background: #eeece4; margin: 12px 0; padding: 6px; border-radius: 5px; font-size: 12px; }
+.reviewMain { border-right: 1px solid var(--line); background-image: linear-gradient(90deg,#9991 1px,transparent 1px),linear-gradient(#9991 1px,transparent 1px); background-size: 24px 24px; }
+.reviewBody { padding: 10px; }
+.reviewBody > div > h1, .botConversation h1 { font-size: 18px; }
+.reviewBody .sampleRequest { background: #eeeae0; }
+.reviewBody .reviewAnswer { color: #302721; font: 15px/1.5 Georgia,serif; }
+.sampleTask, .reviewInspector details { background: #fff; border: 1px solid var(--line); border-radius: 9px; padding: 9px; }
+.sampleTask pre { overflow: auto; color: #356247; }
+.reviewInspector summary { color: #27221b; font-weight: 700; cursor: pointer; }
+.reviewInspector p { margin: 7px 0 0; font-size: 12px; }
+.botWindow { --panel: #f3f3f3; --accent: #245cae; grid-template-columns: minmax(126px,30%) minmax(0,1fr); background: #fafafa; }
+.botRail { display: flex; flex-direction: column; gap: 16px; }
+.botRail button { display: flex; align-items: center; gap: 6px; background: #e6e6e6; font-size: 12px; }
+.botRail p { margin: auto 0; text-align: center; }
+.botAvatar { --bot-color: #3d79d9; display: inline-block; position: relative; flex: none; width: 22px; aspect-ratio: 1; border-radius: 50%; background: var(--bot-color); }
+.botAvatar::before,.botAvatar::after { content: ''; width: 12%; height: 26%; position: absolute; top: 40%; left: 35%; background: #fff; border-radius: 12px; transform: rotate(17deg); }
+.botAvatar::after { left: 55%; }
+.botAvatar[data-shape="Oval"] { border-radius: 65% 45% 58% 42%; }
+.botAvatar[data-shape="Square"] { border-radius: 23%; }
+.botAvatar[data-shape="Capsule"] { aspect-ratio: 1.38; }
+.botAvatar[data-shape="Triangle"] { clip-path: polygon(50% 0,100% 90%,0 90%); border-radius: 15%; }
+.botAvatar[data-shape="Hexagon"] { clip-path: polygon(50% 0,94% 23%,94% 77%,50% 100%,6% 77%,6% 23%); border-radius: 0; }
+.botAvatar[data-shape="Cloud"] { border-radius: 40% 55% 49% 46% / 50% 50% 38% 40%; }
+.botAvatar[data-shape="Drop"] { border-radius: 60% 7% 63% 53%; transform: rotate(-15deg); }
+.botSetup { width: min(100% - 20px, 342px); margin: 20px auto; display: grid; justify-items: start; gap: 8px; }
+.botSetup > .botAvatar { width: 52px; justify-self: center; }
+.botSetup label { font-size: 12px; }
+.botSetup #start-bot { justify-self: center; background: #245cae; color: #fff; padding: 6px 13px; }
+.botSetup #start-bot:disabled { background: #dedee0; color: #555; }
+.swatches { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.referenceApp .swatch { width: 20px; height: 20px; padding: 0; border: 2px solid #fff; border-radius: 50%; background: var(--swatch); }
+.referenceApp .shapeChoice { border: 1px solid transparent; padding: 1px; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+.shapeChoice .botAvatar { width: 16px; }
+.swatches button[aria-pressed="true"] { outline: 1px solid #245cae; }
+.botSuggestions,.botConversation { padding: 0 12px 12px; }
+.botConversation { padding-top: 14px; }
+.botSuggestions h2 { margin: 0 0 6px; font-size: 12px; color: #555; }
+.botSuggestions > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.botSuggestions button { display: flex; align-items: center; gap: 6px; padding: 7px; min-width: 0; text-align: left; }
+.botSuggestions button span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.botSuggestions button strong,.botSuggestions button small { display: block; font-size: 11px; }
+@media (max-width: 540px) {
+  .reviewWindow { grid-template-columns: minmax(0,1fr) minmax(120px,.55fr); }
+  .reviewRail { display: none; }
+}
+@media (max-width: 420px) {
+  .referenceSplit,.reviewWindow,.botWindow { grid-template-columns: minmax(0,1fr); }
+  .reviewInspector,.botRail { display: none; }
+  .diffPanel { border-left: 0; border-top: 1px solid var(--line); }
+  .referenceApp header .actions { margin-left: 0; }
+}
+
+.sampleFileList {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+.sampleFileList > strong { display: block; padding: 0 4px 6px; }
+.referenceApp .sampleFileList button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 4px;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid #e9e9e9;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.sampleFileList button span:last-child { color: #205885; white-space: nowrap; }
+.sampleFileList button:hover { background: #f5f7fb; }
+.sampleFileDialog {
+  color: #202122;
+  width: min(86%, 640px);
+  max-height: 84vh;
+  overflow: auto;
+  padding: 0;
+  border: 1px solid #e3e3e3;
+  border-radius: 15px;
+  background: #f9f9f9;
+  box-shadow: 0 18px 48px #24242438;
+}
+.sampleFileDialog::backdrop { background: #26353c28; }
+.sampleFileDialog header { position: sticky; top: 0; z-index: 1; }
+.sampleFileDialog .sampleDiff { background: #f1f1f1; }
+.sampleDiff b { display: inline-block; width: 9px; flex: none; text-align: center; }
+.sampleDiff code { white-space: pre; }
+.diffTabs { display: flex; flex-wrap: wrap; gap: 3px; padding: 5px; background: #efefed; border-bottom: 1px solid var(--line); }
+.referenceApp .diffTabs button { border: 1px solid transparent; border-radius: 5px; background: transparent; padding: 4px 7px; font-size: 12px; }
+.referenceApp .diffTabs button[aria-pressed="true"] { border-color: #b3c8d8; background: #fff; color: #13466a; }
+.botTitle { display: inline-flex; align-items: center; gap: 7px; }
+.botTitle .botAvatar { width: 18px; }
+.botRail { border-right: 1px solid var(--line); background: #f3f3f3; }
+.botMain { display: flex; flex-direction: column; }
+.botMain .botSuggestions { margin-top: auto; }
+.botSetup { gap: 10px; }
+.botSetup > .botAvatar { width: clamp(50px, 10vw, 72px); margin: 4px 0 6px; }
+.reviewRail { background: #f8f7f2; }
+.reviewMain .sampleRequest { margin-left: 10%; }
+.reviewInspector details { background: #faf9f3; }
+
+/* Distinct application surfaces with shared, real Roseram controls. */
+.workspaceRail { display: flex; flex-direction: column; gap: 18px; border-right: 1px solid var(--line); background: var(--panel); padding: 18px 12px !important; }
+.workspaceRail strong { font-size: 12px; letter-spacing: .03em; }
+.workspaceRail p { margin: 0; padding: 9px 7px; border-radius: 6px; background: #00000006; font-size: 12px; }
+.workspaceRail small { font-size: 10px; margin-top: auto; }
+.workspaceRail button { text-align: left; font-size: 12px; padding: 8px; }
+.referenceSplit { grid-template-columns: 136px minmax(0,.9fr) minmax(0,1.1fr); min-height: calc(100vh - 53px); }
+.codexWindow { border-top: 0; --panel: #f7f7f5; --line: #e2e2de; --accent: #202124; }
+.codexWindow header { background: #fcfcfb; }
+.codexWindow .sampleRequest { border-radius: 18px; padding: 14px; }
+.codexWindow #composer { box-shadow: 0 4px 20px #00000005; border-radius: 20px; }
+.codexWindow .referenceHeading h1 { font-weight: 600; letter-spacing: -.04em; }
+.reviewWindow { --accent: #ae563b; font-family: ui-sans-serif, system-ui, sans-serif; }
+.reviewWindow .reviewAnswer { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 13px; line-height: 1.8; }
+.reviewWindow .reviewMain { background: #faf9f5; }
+.reviewWindow .reviewBody { background-image: none; padding: 24px; }
+.reviewWindow .referenceTabs { justify-content: space-between; background: transparent; }
+.reviewWindow .referenceTabs strong { color: #a14930; }
+.reviewWindow #composer { border-radius: 16px; padding: 14px; }
+.cursorWindow { color-scheme: dark; color: #e6e6e6; background: #1b1b1d; --panel: #202022; --line: #363638; --accent: #cad8ef; border-top: 0; }
+.cursorWindow .referenceSplit { grid-template-columns: 136px minmax(0,1fr) minmax(0,1.1fr); }
+.cursorWindow .referenceSplit main { grid-column: 3; grid-row: 1; }
+.cursorWindow .diffPanel { grid-column: 2; grid-row: 1; border-left: 0; border-right: 1px solid var(--line); background: #1b1b1d; }
+.cursorWindow header { background: #202022; }
+.cursorWindow :is(p,small,details) { color: #aaaab0; }
+.cursorWindow button, .cursorWindow input, .cursorWindow textarea { color: #dedee2; background: #242426; border-color: #414145; }
+.cursorWindow #composer { background: #252527; }
+.cursorWindow #send, .cursorWindow #example { color: #151619; background: #d9dfeb; }
+.cursorWindow #log article, .cursorWindow .sampleRequest, .cursorWindow .sampleFileList, .cursorWindow .diffTabs, .cursorWindow .diffFile { background: #252527; color: #dddde3; }
+.cursorWindow .sampleFileList button { color: #d2d3dc; border-color: #414145; }
+.cursorWindow .sampleFileList button span:last-child { color: #9cbbec; }
+.cursorWindow .sampleDiff { color: #c2c2ca; }
+.cursorWindow .sampleDiff .added { background: #1c3b2d; color: #a3dcac; }
+.cursorWindow .sampleDiff .removed { background: #422827; color: #f2b4b0; }
+.cursorWindow .diffTabs button[aria-pressed="true"] { background: #343438; color: #eee; }
+.botWindow { color-scheme: dark; color: #efeff3; background: #151517; --panel: #1c1c1e; --line: #343438; --accent: #dddde5; }
+.botWindow .botRail, .botWindow .botMain, .botWindow header { background: #171719; color: #efeff3; }
+.botWindow .botRail { background: #101012; }
+.botWindow :is(p,small,details) { color: #a8a8b1; }
+.botWindow button, .botWindow input, .botWindow textarea { background: #222225; border-color: #3c3c41; color: #eeeeF2; }
+.botWindow #composer { background: #222225; border-radius: 24px; }
+.botWindow #send, .botWindow #example, .botWindow #start-bot { background: #ececf0; color: #19191c; }
+.botWindow #log article { background: #222225; }
+.botWindow .botSetup { width: min(500px,calc(100% - 40px)); margin: 40px auto; }
+.botWindow .botSuggestions button { background: #1b1b1e; }
+@media(max-width: 760px) {
+  .workspaceRail { display: none; }
+  .referenceSplit, .cursorWindow .referenceSplit { grid-template-columns: minmax(0,.9fr) minmax(0,1.1fr); }
+  .cursorWindow .referenceSplit main { grid-column: 2; }
+  .cursorWindow .diffPanel { grid-column: 1; }
+}
+@media(max-width: 440px) {
+  .referenceSplit, .cursorWindow .referenceSplit { grid-template-columns: minmax(0,1fr); }
+  .cursorWindow .referenceSplit main, .cursorWindow .diffPanel { grid-column: 1; grid-row: auto; }
+  .referenceApp .referenceSplit main { padding: 14px; }
+  .reviewWindow .reviewBody { padding: 14px; }
+}
+.cursorWindow #log article, .cursorWindow #log article strong, .cursorWindow #log article div, .botWindow #log article, .botWindow #log article strong, .botWindow #log article div { color: #e6e6ef; }
+.cursorWindow #status, .botWindow #status { color: #bac9ea; }
+</style></head><body class="referenceBody"><div class="referenceApp botWindow"><aside class="botRail"><span class="windowDots" aria-hidden="true"><i></i><i></i><i></i></span><button type="button" id="new-bot"><span class="botAvatar" aria-hidden="true"></span><strong>Create your first Bot</strong></button><p id="bot-session">No chats yet</p><small>Roseram</small></aside><main class="botMain"><header><strong class="botTitle"><span class="botAvatar" data-bot-title-face aria-hidden="true"></span><span id="bot-title">New Bot</span></strong><div class="actions"><button id="reset" type="button">New session</button></div></header><section class="botSetup" aria-label="Customize your bot"><div class="botAvatar" data-bot-face data-shape="Circle" aria-hidden="true"></div><div class="swatches" role="group" aria-label="Bot color"><button type="button" class="swatch" style="--swatch:#836140" data-color="#836140" aria-label="Cocoa" aria-pressed="false"></button><button type="button" class="swatch" style="--swatch:#dc3c40" data-color="#dc3c40" aria-label="Red" aria-pressed="false"></button><button type="button" class="swatch" style="--swatch:#ec7527" data-color="#ec7527" aria-label="Orange" aria-pressed="false"></button><button type="button" class="swatch" style="--swatch:#d48824" data-color="#d48824" aria-label="Gold" aria-pressed="false"></button><button type="button" class="swatch" style="--swatch:#4cad63" data-color="#4cad63" aria-label="Green" aria-pressed="false"></button><button type="button" class="swatch" style="--swatch:#4ca798" data-color="#4ca798" aria-label="Teal" aria-pressed="false"></button><button type="button" class="swatch" style="--swatch:#3d79d9" data-color="#3d79d9" aria-label="Blue" aria-pressed="true"></button><button type="button" class="swatch" style="--swatch:#8457dd" data-color="#8457dd" aria-label="Purple" aria-pressed="false"></button><button type="button" class="swatch" style="--swatch:#d94693" data-color="#d94693" aria-label="Pink" aria-pressed="false"></button><button type="button" class="swatch" style="--swatch:#737476" data-color="#737476" aria-label="Gray" aria-pressed="false"></button></div><div class="swatches" role="group" aria-label="Bot shape"><button type="button" class="shapeChoice" data-shape-choice="Circle" aria-label="Circle" aria-pressed="true"><span class="botAvatar" data-shape="Circle" aria-hidden="true"></span></button><button type="button" class="shapeChoice" data-shape-choice="Oval" aria-label="Oval" aria-pressed="false"><span class="botAvatar" data-shape="Oval" aria-hidden="true"></span></button><button type="button" class="shapeChoice" data-shape-choice="Square" aria-label="Square" aria-pressed="false"><span class="botAvatar" data-shape="Square" aria-hidden="true"></span></button><button type="button" class="shapeChoice" data-shape-choice="Capsule" aria-label="Capsule" aria-pressed="false"><span class="botAvatar" data-shape="Capsule" aria-hidden="true"></span></button><button type="button" class="shapeChoice" data-shape-choice="Triangle" aria-label="Triangle" aria-pressed="false"><span class="botAvatar" data-shape="Triangle" aria-hidden="true"></span></button><button type="button" class="shapeChoice" data-shape-choice="Hexagon" aria-label="Hexagon" aria-pressed="false"><span class="botAvatar" data-shape="Hexagon" aria-hidden="true"></span></button><button type="button" class="shapeChoice" data-shape-choice="Cloud" aria-label="Cloud" aria-pressed="false"><span class="botAvatar" data-shape="Cloud" aria-hidden="true"></span></button><button type="button" class="shapeChoice" data-shape-choice="Drop" aria-label="Drop" aria-pressed="false"><span class="botAvatar" data-shape="Drop" aria-hidden="true"></span></button></div><label for="bot-name">Name</label><input id="bot-name" maxlength="45" placeholder="New Bot" autocomplete="off"><button type="button" id="start-bot" disabled>Get started</button></section><section class="botSuggestions" aria-label="Suggestions"><h2>Suggestions</h2><div><button type="button" data-bot-suggestion="Night Shift"><span class="botAvatar" data-shape="Hexagon" style="--bot-color:#ec7527" aria-hidden="true"></span><span><strong>Night Shift</strong><small>Draft a morning digest from your notes.</small></span></button><button type="button" data-bot-suggestion="Inbox Triage"><span class="botAvatar" data-shape="Cloud" style="--bot-color:#d94693" aria-hidden="true"></span><span><strong>Inbox Triage</strong><small>Organize a pasted inbox and draft replies.</small></span></button></div></section><section id="bot-conversation" class="botConversation" hidden><div><h1>What are you working on?</h1><div id="log" role="log" aria-label="Conversation"></div><form id="composer"><label for="prompt">Prompt</label><textarea id="prompt" rows="2" maxlength="8000" placeholder="Draft a short welcome note for a new subscriber." required></textarea><div class="submit"><button id="send" type="submit">Send</button></div></form><p id="status" role="status"></p></div></section></main></div><script type="application/json" id="settings">{"id":"chat","slug":"grok-bot","name":"Roseram Grok Bot","reference":"AI assistant","layout":"chat","prompt":"Draft a short welcome note for a new subscriber.","result":"You’re on the list! We’ll send your first update soon. In the meantime, reply and tell us what you’re building.","demo":false,"hosted":true}</script><script>const app = JSON.parse(document.getElementById('settings').textContent);
+const $ = selector => document.querySelector(selector);
+const editor = $('#source');
+const form = $('#composer');
+const prompt = $('#prompt');
+const send = $('#send');
+const log = $('#log');
+const notifications = $('#status');
+let history = [];
+let busy = false;
+prompt.addEventListener('keydown', event => {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') form.requestSubmit();
+});
+let currentFile = app.file || 'untitled.txt';
+
+function addMessage(label, text) {
+  const entry = document.createElement('article');
+  const heading = document.createElement('strong');
+  const body = document.createElement('div');
+  heading.textContent = label;
+  body.textContent = text;
+  entry.append(heading, body);
+  log.append(entry);
+  entry.scrollIntoView({ block: 'nearest' });
+}
+function clearConversation() {
+  history = [];
+  log.replaceChildren();
+  notifications.textContent = '';
+}
+
+const botSetupPanel = $('.botSetup');
+const botConversation = $('#bot-conversation');
+const botName = $('#bot-name');
+const reviewProgress = $('#review-progress');
+
+const sourceDialog = $('.sampleFileDialog');
+if (sourceDialog) {
+  const selectFile = id => {
+    for (const panel of document.querySelectorAll('[data-diff-sheet]')) panel.hidden = panel.dataset.diffSheet !== id;
+    for (const tab of document.querySelectorAll('[data-diff-tab]')) tab.setAttribute('aria-pressed', String(tab.dataset.diffTab === id));
+  };
+  for (const tab of document.querySelectorAll('[data-diff-tab]')) {
+    tab.addEventListener('click', () => selectFile(tab.dataset.diffTab));
+  }
+  for (const button of document.querySelectorAll('[data-sample-file]')) {
+    button.addEventListener('click', () => {
+      const id = button.dataset.sampleFile;
+      selectFile(id);
+      $('[data-source-title]').textContent = button.querySelector('span').textContent;
+      for (const panel of sourceDialog.querySelectorAll('[data-source-sheet]')) panel.hidden = panel.dataset.sourceSheet !== id;
+      sourceDialog.showModal();
+    });
+  }
+  $('[data-close-file]').addEventListener('click', () => sourceDialog.close());
+}
+
+
+function startBot(name) {
+  if (!botName || busy || !name.trim()) return;
+  clearConversation();
+  $('#bot-title').textContent = name.trim();
+  $('#bot-session').textContent = name.trim();
+  botSetupPanel.hidden = true;
+  $('.botSuggestions').hidden = true;
+  botConversation.hidden = false;
+  prompt.focus();
+}
+
+if (botName) {
+  const start = $('#start-bot');
+  const face = $('[data-bot-face]');
+  botName.addEventListener('input', () => { start.disabled = !botName.value.trim(); });
+  start.addEventListener('click', () => startBot(botName.value));
+  botName.addEventListener('keydown', event => { if (event.key === 'Enter') startBot(botName.value); });
+  for (const button of document.querySelectorAll('[data-color], [data-shape-choice]')) {
+    button.addEventListener('click', () => {
+      for (const choice of button.parentElement.querySelectorAll('button')) choice.setAttribute('aria-pressed', String(choice === button));
+      if (button.dataset.color) {
+        for (const avatar of document.querySelectorAll('[data-bot-face], [data-bot-title-face], .shapeChoice .botAvatar')) avatar.style.setProperty('--bot-color', button.dataset.color);
+      } else {
+        face.dataset.shape = button.dataset.shapeChoice;
+        $('[data-bot-title-face]').dataset.shape = button.dataset.shapeChoice;
+      }
+    });
+  }
+  for (const suggestion of document.querySelectorAll('[data-bot-suggestion]')) {
+    suggestion.addEventListener('click', () => {
+      botName.value = suggestion.dataset.botSuggestion;
+      start.disabled = false;
+      botName.focus();
+    });
+  }
+  $('#new-bot').addEventListener('click', () => {
+    if (busy) return;
+    clearConversation();
+    prompt.value = '';
+    botName.value = '';
+    start.disabled = true;
+    botSetupPanel.hidden = false;
+    $('.botSuggestions').hidden = false;
+    botConversation.hidden = true;
+    $('#bot-title').textContent = 'New Bot';
+    $('#bot-session').textContent = 'No chats yet';
+    botName.focus();
+  });
+}
+
+$('[data-reset]')?.addEventListener('click', () => $('#reset').click());
+
+$('#reset').addEventListener('click', () => { if (!busy) clearConversation(); });
+if (editor && !app.demo) {
+  $('#file').addEventListener('change', async event => {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 65000) {
+      notifications.textContent = 'Choose a text file under 65 KB.';
+      return;
+    }
+    try {
+      const content = await file.text();
+      if (content.includes('\0')) throw new Error('Choose a plain text source file.');
+      editor.value = content;
+      currentFile = file.name;
+      $('#filename').textContent = currentFile;
+      notifications.textContent = 'File opened. Sending a prompt includes the text shown here.';
+    } catch (error) {
+      notifications.textContent = error.message;
+    }
+  });
+  $('#save').addEventListener('click', () => {
+    const href = URL.createObjectURL(new Blob([editor.value], { type: 'text/plain' }));
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = currentFile;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(href), 1000);
+  });
+}
+
+
+function requestAccount(promptText, source) {
+  return new Promise((resolve, reject) => {
+    if (window.parent === window) {
+      reject(new Error('Open this app from the Roseram downloads page.'));
+      return;
+    }
+    const id = crypto.randomUUID();
+    const origin = new URL(location.href).origin;
+    const complete = () => {
+      clearTimeout(timer);
+      window.removeEventListener('message', receive);
+    };
+    const receive = event => {
+      if (event.source !== window.parent || event.origin !== origin || event.data?.channel !== 'roseram-app-response' || event.data.id !== id) return;
+      complete();
+      if (event.data.error) reject(Object.assign(new Error(event.data.error), { billing: event.data.billing }));
+      else resolve(event.data.text);
+    };
+    const timer = setTimeout(() => {
+      complete();
+      reject(new Error('Roseram did not respond. Check your connection and account.'));
+    }, 320000);
+    window.addEventListener('message', receive);
+    window.parent.postMessage({ channel: 'roseram-app-request', id, prompt: promptText, source, filename: currentFile, history }, origin);
+  });
+}
+
+async function submit(action) {
+  const input = prompt.value.trim();
+  if (busy || (action !== 'models' && !input)) return;
+  const source = editor?.value || '';
+  busy = true;
+  send.disabled = true;
+  if (reviewProgress) reviewProgress.textContent = '●  ◯  ◯  · Reviewing source';
+  notifications.textContent = app.demo ? 'Playing example…' : 'Waiting for Roseram…';
+  if (action !== 'models') addMessage('You', input);
+  try {
+    let text;
+    if (app.demo) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      text = action === 'models' ? 'roseram' : app.result;
+    } else if (app.hosted) {
+      text = await requestAccount(input, source);
+    } else {
+      const response = await fetch('/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: $('#key').value, prompt: input, source, action, messages: history }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      text = result.text;
+    }
+    if (reviewProgress) reviewProgress.textContent = '✓  ✓  ✓  · Review complete';
+    addMessage(action === 'models' ? 'Available models' : app.name, text);
+    if (action !== 'models') {
+      history = [...history, { role: 'user', content: input }, { role: 'assistant', content: text }].slice(-8);
+      prompt.value = '';
+    }
+    notifications.textContent = '';
+  } catch (error) {
+    notifications.textContent = error.message;
+    if (reviewProgress) reviewProgress.textContent = 'Review interrupted';
+    if (error.billing) notifications.append(' ', Object.assign(document.createElement('a'), { href: '/plans', target: '_blank', rel: 'noopener noreferrer', textContent: 'View plans' }));
+  } finally {
+    busy = false;
+    send.disabled = false;
+  }
+}
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  void submit('complete');
+});
+$('#models')?.addEventListener('click', () => void submit('models'));
+$('#example')?.addEventListener('click', () => {
+  if (busy) return;
+  if (botName) startBot(botName.value || 'Launch Assistant');
+  else clearConversation();
+  prompt.value = app.prompt;
+  void submit('complete');
+});
+</script></body></html>

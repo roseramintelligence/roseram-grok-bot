@@ -1,0 +1,16 @@
+{
+  "name": "roseram-grok-bot",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Roseram Grok Bot Roseram app and API client",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.mjs",
+    "help": "node src/index.mjs --help",
+    "check": "node --check src/index.mjs"
+  }
+}
