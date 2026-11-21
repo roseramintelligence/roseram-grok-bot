@@ -1,60 +1,25 @@
 # Roseram Grok Bot
 
-A text assistant workspace for questions, explanations, writing, and idea development.
+A multi-file Roseram project workspace and desktop client. This is an independent Roseram project, not an official application from another AI or editor vendor. Existing upstream integrations and their licenses remain in `upstream/`.
 
-> **Current scope:** This repository publishes Roseram's current app source. It is an early browser/API client, not a native local-repository IDE or a clone of another company's private application.
+## Run the local application
 
-## Upstream integration
+Requires Node.js 22 or later. Run `npm start`, then open the printed loopback URL. The editor, projects, imports, exports and HTML preview work without an account. Connect a Roseram developer key for model requests; the key stays in memory and is sent only to the local gateway and Roseram API. Developer API access and credits are required. `ROSERAM_API_KEY` can also be provided in the server environment. Never commit a key.
 
-Add Roseram as a per-user model endpoint in LibreChat. [Setup instructions and configuration](upstream/README.md).
+## Workspaces
 
-## What is included
+Open up to 200 text files with a combined size of 2 MB. Private environment files, keys, build folders and binaries are excluded. Ask questions, request a plan, or choose Edit to receive complete-file proposals. Review proposals before applying them. Stale file baselines and unsupported paths are rejected. No generated code is automatically executed. Local API requests include a bounded selection of up to 12 files / 48,000 characters. Conversations, drafts and working copies are saved in this browser; export a project for a separate copy.
 
-- `src/index.mjs`: self-contained Node.js local web app and Roseram API client.
-- `web/demo.html`: interactive sample with fictional content.
-- `web/hosted-workspace.html`: browser workspace source used by the signed-in Roseram site.
-- `web/roseram.webmanifest`: install metadata for the hosted Roseram route.
+The hosted account-connected application is [roseram.com/downloads/grok-bot?run=1](https://roseram.com/downloads/grok-bot?run=1). It uses the existing Roseram account, billing and generation-job services. This local package uses developer API credentials instead.
 
-## Run the API client
+## Windows desktop source
 
-Requires Node.js 22 or later and an eligible Roseram developer API key.
+`cd desktop`, `npm ci`, then `npm start` or `npm run build:windows`. The desktop client opens the hosted Roseram workspace, adds native folder selection, saves with backups and explicit approval, and executes approved project commands with real exit statuses and bounded output. Internet access is needed to load the hosted UI and use models. Native tools are restricted to the trusted top-level workspace; renderer Node integration is disabled.
 
-```sh
-# Set ROSERAM_API_KEY in your shell; do not commit it.
-npm start
-```
+Unsigned builds are development candidates. Production installers require platform signing and a verified release. Automatic updates continue to require signed release metadata and OS verification. macOS production builds additionally require a macOS runner, signing and notarization; no macOS acceptance is implied by a Windows build.
 
-The server binds to loopback, prints a local URL, and sends model requests to Roseram's API. The key is read from the environment or entered in the app. Treat it like a password and revoke it from your Roseram account if it is exposed.
+## Build and checks
 
-## Roseram account integration
+Run `npm ci`, `npm run build`, and `npm test` to rebuild the bundled React application and run its core, HTTP and native integration tests. The committed bundle lets end users run `npm start` without a toolchain installation. Tests use synthetic keys and mocked model responses; a paid live model response is a separate acceptance check. Native integration tests use mocked approval dialogs and real temporary files / commands.
 
-The live hosted route is [roseram.com/downloads/grok-bot](https://roseram.com/downloads/grok-bot). It uses Roseram sign-in, server-side plan/credit checks, and usage metering. The hosted workspace talks to the parent Roseram page using a restricted message bridge; the Node.js client instead uses a developer API key. A standalone repository clone does not independently implement Roseram account login or billing.
-
-## Terminal workflow
-
-Use Node.js 22 or later and set `ROSERAM_API_KEY` in your shell.
-
-```sh
-npm run terminal -- --mode chat
-```
-
-For available modes, run `npm run terminal -- --help`. An interactive terminal keeps the recent conversation in memory. Use `/clear` to reset it and `/quit` to exit. Model requests may use Roseram credits.
-
-## Current limitations
-
-The current browser client provides text conversation. It does not implement X automation, voice, or media generation.
-
-Signed native desktop installers are not currently included. The Node.js package is an API client, not a desktop installer.
-
-## Development
-
-```sh
-npm run check
-npm run help
-```
-
-Contributions should preserve the MIT license and must not commit API keys, account data, or private customer material. See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
-
-## Independence and names
-
-This is an independent Roseram project. It is not affiliated with or an official client of any third-party AI, editor, or coding-agent vendor. No third-party proprietary source code is included.
+`application-src/` contains the complete UI and its frontend dependencies. `src/workspace-server.mjs` is the loopback-only model gateway; `desktop/` contains the native client. The original CLI and API helpers remain available, with the previous entry point under `npm run legacy`.

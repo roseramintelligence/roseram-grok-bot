@@ -1,0 +1,67 @@
+{
+  "name": "roseram-desktop",
+  "version": "0.2.0",
+  "private": true,
+  "main": "main.cjs",
+  "description": "Roseram workspace desktop client",
+  "author": "Roseram",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "build:windows": "electron-builder --win nsis",
+    "build:mac": "electron-builder --mac dmg zip",
+    "build:developer": "node developer-builder.cjs"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.9"
+  },
+  "devDependencies": {
+    "electron": "44.6.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.roseram.grok-bot",
+    "productName": "Roseram Grok Bot",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "*.cjs",
+      "*.json",
+      "build/icon.png"
+    ],
+    "extraResources": [],
+    "win": {
+      "target": "nsis",
+      "verifyUpdateCodeSignature": true,
+      "signtoolOptions": {
+        "publisherName": [
+          "Roseram"
+        ]
+      },
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools",
+      "hardenedRuntime": true,
+      "icon": "build/icon.icns"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    },
+    "publish": {
+      "provider": "generic",
+      "url": "https://roseram.com/releases/desktop/"
+    },
+    "executableName": "roseram-grok-bot"
+  },
+  "roseramApp": "chat"
+}

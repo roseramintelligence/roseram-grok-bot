@@ -1,0 +1,8 @@
+{
+  "appOrigin": "https://roseram.com",
+  "manifestUrl": "https://roseram.com/api/client/manifest",
+  "releasePublicKey": "MCowBQYDK2VwAyEA9MiSGdxgVTwOFliNcE0vRqkNIk1gtYW9ZPfQcrDWAGk=",
+  "artifactOrigins": [
+    "https://roseram.com"
+  ]
+}
