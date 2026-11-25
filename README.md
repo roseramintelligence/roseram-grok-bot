@@ -1,4 +1,13 @@
-# Roseram Grok Bot
+<p align="center"><img src="docs/roseram-banner.svg" alt="Roseram Grok Bot" width="100%"></p>
+
+<h1 align="center">Roseram Grok Bot</h1>
+<p align="center">Build, learn and explore AI-powered workspaces with Roseram.</p>
+<p align="center">[Launch web workspace](https://roseram.com/downloads/grok-bot?run=1) · <a href="https://roseram.com/">Website</a> · <a href="https://roseram.com/developers">Developer API</a> · <a href="https://github.com/roseramintelligence/roseram-grok-bot/issues">Issues</a></p>
+<p align="center"><a href="https://github.com/roseramintelligence/roseram-grok-bot/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/roseramintelligence/roseram-grok-bot?style=flat-square"></a> <a href="https://github.com/roseramintelligence/roseram-grok-bot/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/roseramintelligence/roseram-grok-bot?style=flat-square"></a> <a href="https://github.com/roseramintelligence/roseram-grok-bot/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/roseramintelligence/roseram-grok-bot?style=flat-square"></a></p>
+
+> If this project is useful to you, consider starring it, sharing feedback, or contributing through a pull request.
+
+## About this project
 
 A multi-file Roseram project workspace and desktop client. This is an independent Roseram project, not an official application from another AI or editor vendor. Existing upstream integrations and their licenses remain in `upstream/`.
 
@@ -23,3 +32,22 @@ Unsigned builds are development candidates. Production installers require platfo
 Run `npm ci`, `npm run build`, and `npm test` to rebuild the bundled React application and run its core, HTTP and native integration tests. The committed bundle lets end users run `npm start` without a toolchain installation. Tests use synthetic keys and mocked model responses; a paid live model response is a separate acceptance check. Native integration tests use mocked approval dialogs and real temporary files / commands.
 
 `application-src/` contains the complete UI and its frontend dependencies. `src/workspace-server.mjs` is the loopback-only model gateway; `desktop/` contains the native client. The original CLI and API helpers remain available, with the previous entry point under `npm run legacy`.
+
+## Explore the Roseram ecosystem
+
+| Project | Purpose |
+| --- | --- |
+| [Roseram Codex](https://github.com/roseramintelligence/roseram-codex) | Local AI project workspace and desktop client |
+| [Roseram Claude Code](https://github.com/roseramintelligence/roseram-claude-code) | Local AI project workspace and desktop client |
+| [Roseram Grok Bot](https://github.com/roseramintelligence/roseram-grok-bot) | Local AI project workspace and desktop client |
+| [Roseram Cursor](https://github.com/roseramintelligence/roseram-cursor) | Local AI project workspace and desktop client |
+| [Roseram Preview](https://github.com/roseramintelligence/roseram-preview) | Product interface preview |
+
+## Get involved
+
+- Browse the source and open issues for reproducible bugs or feature ideas.
+- Submit focused pull requests with context and verification details.
+- For security-sensitive reports, contact [support@roseram.com](mailto:support@roseram.com) privately; do not include credentials or customer data in public issues.
+- See the repository's license and upstream notices before redistributing.
+
+The Roseram hosted service and its API are separate from the public client source. Account eligibility, credits, and service availability apply to hosted model requests.
